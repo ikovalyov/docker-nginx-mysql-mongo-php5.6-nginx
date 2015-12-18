@@ -42,7 +42,7 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN wget http://getcomposer.org/installer && php installer && mv composer.phar /usr/local/bin/composer && rm installer
 
 #git
-RIN apt-get install -y git
+RUN apt-get install -y git
 
 ENTRYPOINT ["/bin/sh","-c"]
 
