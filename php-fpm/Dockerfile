@@ -42,7 +42,8 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN wget http://getcomposer.org/installer && php installer && mv composer.phar /usr/local/bin/composer && rm installer
 
 #git
-RUN apt-get install -y git
+RUN apt-get install -y git && apt-get install php5-mongo && apt-get install curl && curl --silent --location https://deb.nodesource.com/setup_4.x | sudo bash - && \
+  apt-get install -y nodejs && npm install -g bower
 
 ENTRYPOINT ["/bin/sh","-c"]
 
