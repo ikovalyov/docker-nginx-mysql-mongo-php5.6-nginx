@@ -65,6 +65,7 @@ RUN pecl install zip && docker-php-ext-enable zip
 RUN docker-php-ext-install mysqli
 #RUN echo "extension=mysqli.so" >> /usr/local/etc/php/php.ini
 RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install gettext
   
 #other
 RUN apt-get install -y vim nano
