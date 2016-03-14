@@ -53,7 +53,7 @@ RUN wget http://getcomposer.org/installer && php installer && mv composer.phar /
 
 #git
 RUN apt-get install -y --force-yes libcurl4-openssl-dev pkg-config libssl-dev
-RUN pecl install mongodb
+RUN pecl install mongodb && docker-php-ext-enable mongodb
 #RUN echo "extension=mongodb.so" >> /usr/local/etc/php/php.ini
 RUN apt-get install -y --force-yes git && apt-get install -y curl && curl --silent --location https://deb.nodesource.com/setup_4.x | bash - && \
   apt-get install -y nodejs && npm install -g bower
@@ -62,9 +62,10 @@ RUN apt-get install -y --force-yes git && apt-get install -y curl && curl --sile
 RUN pecl install zip && docker-php-ext-enable zip
 
 #mysql
-RUN docker-php-ext-install mysqli
-#RUN echo "extension=mysqli.so" >> /usr/local/etc/php/php.ini
-RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install mysqli && docker-php-ext-install pdo_mysql
+
+#apcu
+RUN pecl install apcu && docker-php-ext-enable apcu
   
 #other
 RUN apt-get install -y vim nano
