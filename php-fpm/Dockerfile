@@ -62,7 +62,7 @@ RUN apt-get install -y --force-yes git && apt-get install -y curl && curl --sile
 RUN pecl install zip && docker-php-ext-enable zip
 
 #mysql
-RUN docker-php-ext-install mysqli && docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install mysqli && docker-php-ext-install pdo_mysql && docker-php-ext-install gettext
 
 #apcu
 RUN pecl install apcu && docker-php-ext-enable apcu
