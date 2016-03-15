@@ -70,6 +70,10 @@ RUN docker-php-ext-install gettext
 #other
 RUN apt-get install -y vim nano
 
+#PHPUnit
+WORKDIR /tmp/
+RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit
+
 ENTRYPOINT ["/bin/sh","-c"]
 
 CMD ["/usr/bin/supervisord", "-n"]
