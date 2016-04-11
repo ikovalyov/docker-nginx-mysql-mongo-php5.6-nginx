@@ -21,12 +21,12 @@ RUN cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20151012
 RUN docker-php-ext-enable xdebug
 		
 # Configure xdebug
-RUN mkdir /etc/php7/
-RUN mkdir /etc/php7/mods-available/
+#RUN mkdir /etc/php7/
+#RUN mkdir /etc/php7/mods-available/
 RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_host=172.17.42.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
+RUN echo "xdebug.remote_host=192.168.99.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
 RUN echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 #RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
@@ -72,7 +72,15 @@ RUN apt-get install -y vim nano
 
 #PHPUnit
 WORKDIR /tmp/
-RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit
+RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
+
+#LDAP
+RUN \
+    apt-get update && \
+    apt-get install libldap2-dev -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
+    docker-php-ext-install ldap
 
 ENTRYPOINT ["/bin/sh","-c"]
 
