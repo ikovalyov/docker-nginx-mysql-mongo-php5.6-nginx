@@ -1,6 +1,5 @@
 FROM ubuntu
-
-RUN apt-get install -y nginx
+RUN apt-get update && apt-get install -y nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY fastcgi.conf /etc/nginx/fastcgi.conf
 RUN useradd -s /bin/false nginx
