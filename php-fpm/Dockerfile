@@ -26,7 +26,7 @@ RUN mkdir /etc/php7/mods-available/
 RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_host=172.17.42.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
+RUN echo "xdebug.remote_host=192.168.99.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
 RUN echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 #RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
@@ -65,10 +65,28 @@ RUN pecl install zip && docker-php-ext-enable zip
 RUN docker-php-ext-install mysqli && docker-php-ext-install pdo_mysql && docker-php-ext-install gettext
 
 #apcu
-RUN pecl install apcu && docker-php-ext-enable apcu
+RUN pecl install apcu && docker-php-ext-enable apcu && echo "apc.enable_cli = 1" >> /usr/local/etc/php/php.ini
+
+#PHPUnit
+RUN mkdir /tmp/phpUnit
+WORKDIR /tmp/phpUnit
+RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
   
 #other
-RUN apt-get install -y vim nano
+RUN apt-get install -y vim nano dnsutils cron && service cron start
+
+#intl
+RUN apt-get install -y libicu-dev && docker-php-ext-install intl
+
+#opcode
+RUN docker-php-ext-install opcode
+
+#ldap
+RUN apt-get update && \
+    apt-get install libldap2-dev -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
+    docker-php-ext-install ldap
 
 ENTRYPOINT ["/bin/sh","-c"]
 
