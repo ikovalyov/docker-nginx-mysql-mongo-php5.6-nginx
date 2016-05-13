@@ -21,8 +21,8 @@ RUN cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20151012
 RUN docker-php-ext-enable xdebug
 		
 # Configure xdebug
-RUN mkdir /etc/php7/
-RUN mkdir /etc/php7/mods-available/
+#RUN mkdir /etc/php7/
+#RUN mkdir /etc/php7/mods-available/
 RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
@@ -83,6 +83,18 @@ RUN docker-php-ext-install opcode
 
 #ldap
 RUN apt-get update && \
+    apt-get install libldap2-dev -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
+    docker-php-ext-install ldap
+
+#PHPUnit
+WORKDIR /tmp/
+RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
+
+#LDAP
+RUN \
+    apt-get update && \
     apt-get install libldap2-dev -y && \
     rm -rf /var/lib/apt/lists/* && \
     docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
