@@ -79,7 +79,7 @@ RUN apt-get install -y vim nano dnsutils cron && service cron start
 RUN apt-get install -y libicu-dev && docker-php-ext-install intl
 
 #opcode
-RUN docker-php-ext-install opcode
+RUN docker-php-ext-install opcache
 
 #ldap
 RUN apt-get update && \
