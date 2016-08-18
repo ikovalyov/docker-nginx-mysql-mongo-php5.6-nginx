@@ -6,5 +6,6 @@ docker-machine ssh dev "sudo mount -t vboxsf -o rw,uid=1000,gid=1000 /documentRo
 docker-machine ssh dev "docker start websites"
 docker-machine ssh dev "docker start mongo"
 docker-machine ssh dev "docker start mysql"
+docker-machine ssh dev "docker start memcache"
 docker-machine ssh dev "docker start php-xdebug"
 docker-machine ssh dev "docker start nginx"
