@@ -81,24 +81,19 @@ RUN apt-get install -y libicu-dev && docker-php-ext-install intl
 #opcode
 RUN docker-php-ext-install opcache
 
-#ldap
-RUN apt-get update && \
-    apt-get install libldap2-dev -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
-    docker-php-ext-install ldap
-
 #PHPUnit
 WORKDIR /tmp/
 RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
 
 #LDAP
-RUN \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install libldap2-dev -y && \
     rm -rf /var/lib/apt/lists/* && \
     docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
     docker-php-ext-install ldap
+	
+#SOCKETS
+RUN docker-php-ext-install sockets
 
 ENTRYPOINT ["/bin/sh","-c"]
 
