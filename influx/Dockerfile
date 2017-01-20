@@ -5,4 +5,6 @@ RUN /bin/bash -c 'source /etc/lsb-release; echo "deb https://repos.influxdata.co
 RUN apt-get update && apt-get install influxdb -y 
 COPY init.sh /etc/init.d/influxd
 RUN chmod +x /etc/init.d/influxd 
+EXPOSE 8083
+EXPOSE 8086
 CMD influxd

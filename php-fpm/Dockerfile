@@ -1,37 +1,33 @@
-FROM php:7-fpm
+FROM php:7.1-fpm
+RUN echo "2017-01-05"
 COPY config/php.ini /usr/local/etc/php/
 
-RUN mkdir /tmp/xdebug
-WORKDIR /tmp/xdebug
-RUN apt-get update && apt-get install -y wget && wget https://xdebug.org/files/xdebug-2.4.0.tgz && tar -xvzf xdebug-2.4.0.tgz
-WORKDIR /tmp/xdebug/xdebug-2.4.0
-RUN echo "Dpkg::Options {\
-   "--force-confdef";\
-   "--force-confold";\
-}" >  /etc/apt/apt.conf.d/local 
+#RUN mkdir /tmp/xdebug
+#WORKDIR /tmp/xdebug
+#RUN apt-get update && apt-get install -y wget ca-certificates && wget --no-check-certificate https://xdebug.org/files/xdebug-2.4.0.tgz && tar -xvzf xdebug-2.4.0.tgz
+#WORKDIR /tmp/xdebug/xdebug-2.4.0
+#RUN echo "Dpkg::Options {\
+#   "--force-confdef";\
+#   "--force-confold";\
+#}" >  /etc/apt/apt.conf.d/local 
 
 #RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --force-yes libc6 libtool libssl1.0.0=1.0.1f-1ubuntu2 php5-dev && DEBIAN_FRONTEND=noninteractive phpize && \
 #		./configure && make && cp modules/xdebug.so /usr/lib/php5/20131226 && echo "zend_extension = /usr/lib/php5/20131226/xdebug.so" > /etc/php5/cli/php.ini && \
 #		echo "zend_extension = /usr/lib/php5/20131226/xdebug.so" > /etc/php5/fpm/php.ini
 
-RUN /usr/local/bin/phpize
-RUN ./configure --enable-xdebug
-RUN make && make test
-RUN cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20151012/
+RUN pecl install xdebug
 RUN docker-php-ext-enable xdebug
 		
 # Configure xdebug
 #RUN mkdir /etc/php7/
 #RUN mkdir /etc/php7/mods-available/
-RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_host=192.168.99.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
-RUN echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN printf "xdebug.remote_enable=1\nxdebug.idekey=PHPSTORM\nxdebug.remote_host=192.168.99.1\nxdebug.remote_autostart=1\nxdebug.remote_port=9001\n" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_host=192.168.99.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
+#RUN echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 #RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
 #RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
-EXPOSE 9001
 
 #configure SSH
 RUN apt-get update && apt-get install -y openssh-server
@@ -42,10 +38,8 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 ENV NOTVISIBLE "in users profile"
 RUN echo "export VISIBLE=now" >> /etc/profile
 
-EXPOSE 22
-
 #supervisor
-RUN apt-get -y install gettext libgettextpo-dev supervisor 
+RUN apt-get -y install gettext libgettextpo-dev supervisor wget
 ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 #composer
@@ -70,7 +64,7 @@ RUN pecl install apcu && docker-php-ext-enable apcu && echo "apc.enable_cli = 1"
 #PHPUnit
 RUN mkdir /tmp/phpUnit
 WORKDIR /tmp/phpUnit
-RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
+RUN wget http://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
   
 #other
 RUN apt-get install -y vim nano dnsutils rsyslog cron && service cron start
@@ -81,19 +75,20 @@ RUN apt-get install -y libicu-dev && docker-php-ext-install intl
 #opcode
 RUN docker-php-ext-install opcache
 
-#PHPUnit
-WORKDIR /tmp/
-RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
-
 #LDAP
-RUN apt-get update && \
-    apt-get install libldap2-dev -y && \
-    rm -rf /var/lib/apt/lists/* && \
-    docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && \
-    docker-php-ext-install ldap
+RUN apt-get install libldap2-dev -y && rm -rf /var/lib/apt/lists/*
+RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/ && docker-php-ext-install ldap
 	
 #SOCKETS
 RUN docker-php-ext-install sockets
+
+#GD
+RUN apt-get update && apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng12-dev 
+RUN docker-php-ext-install -j$(nproc) iconv mcrypt 
+RUN docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ && docker-php-ext-install -j$(nproc) gd
+
+EXPOSE 22
+EXPOSE 9000
 
 ENTRYPOINT ["/bin/sh","-c"]
 
