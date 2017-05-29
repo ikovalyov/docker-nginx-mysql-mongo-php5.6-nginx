@@ -10,27 +10,19 @@ RUN echo "Dpkg::Options {\
    "--force-confold";\
 }" >  /etc/apt/apt.conf.d/local 
 
-#RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --force-yes libc6 libtool libssl1.0.0=1.0.1f-1ubuntu2 php5-dev && DEBIAN_FRONTEND=noninteractive phpize && \
-#		./configure && make && cp modules/xdebug.so /usr/lib/php5/20131226 && echo "zend_extension = /usr/lib/php5/20131226/xdebug.so" > /etc/php5/cli/php.ini && \
-#		echo "zend_extension = /usr/lib/php5/20131226/xdebug.so" > /etc/php5/fpm/php.ini
-
 RUN /usr/local/bin/phpize
 RUN ./configure --enable-xdebug
 RUN make && make test
-RUN cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20151012/
+RUN cp modules/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20160303/
 RUN docker-php-ext-enable xdebug
 		
 # Configure xdebug
-#RUN mkdir /etc/php7/
-#RUN mkdir /etc/php7/mods-available/
 RUN echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_host=192.168.99.1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini		
 RUN echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 RUN echo "xdebug.remote_port=9001" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
-#RUN cp /etc/php7/mods-available/xdebug.ini /usr/local/etc/php/20-xdebug.ini
 EXPOSE 9001
 
 #configure SSH
@@ -59,7 +51,7 @@ RUN apt-get install -y --force-yes git && apt-get install -y curl && curl --sile
   apt-get install -y nodejs && npm install -g bower
   
 #zip
-RUN pecl install zip && docker-php-ext-enable zip
+RUN apt-get install -y libzip-dev && pecl install zip && docker-php-ext-enable zip
 
 #mysql
 RUN docker-php-ext-install mysqli && docker-php-ext-install pdo_mysql && docker-php-ext-install gettext
@@ -82,7 +74,7 @@ RUN apt-get install -y libicu-dev && docker-php-ext-install intl
 RUN docker-php-ext-install opcache
 
 #PHPUnit
-WORKDIR /tmp/
+WORKDIR /tmp
 RUN wget https://phar.phpunit.de/phpunit.phar && chmod +x phpunit.phar && mv phpunit.phar /usr/local/bin/phpunit.phar
 
 #LDAP
@@ -94,6 +86,19 @@ RUN apt-get update && \
 	
 #SOCKETS
 RUN docker-php-ext-install sockets
+
+#bash aliases
+RUN echo 'alias enableDebug="export PHP_IDE_CONFIG=\"serverName=cli\"; echo \"debug enabled\""' >> ~/.bashrc
+RUN echo 'alias disableDebug="export PHP_IDE_CONFIG=\"serverName=\"; echo \"debug disabled\""' >> ~/.bashrc
+RUN echo 'alias webapp="cd /opt/webapp/"' >> ~/.bashrc
+RUN echo 'alias api="cd /opt/webapp/perfstack-api"' >> ~/.bashrc
+RUN echo 'alias admin="cd /opt/webapp/dnsperf-admin-panel"' >> ~/.bashrc
+
+#redis
+RUN pecl install redis && docker-php-ext-enable redis
+
+#gd
+RUN apt-get update && apt-get install -y libpng-dev && docker-php-ext-install gd
 
 ENTRYPOINT ["/bin/sh","-c"]
 
